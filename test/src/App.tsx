@@ -20,6 +20,7 @@ function App() {
       <Form
         schema={{
           name: { label: "Name", required: true, type: "text", initial: "", autoFill: "name" },
+          phone: { label: "phone", required: true, type: "text", initial: "", autoFill: "mobile tel" },
           number: { label: "Number", required: false, type: "number", initial: 0 }
         }}
         onSubmit={values => {}}
