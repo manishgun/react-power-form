@@ -4,10 +4,13 @@ import "./index.css"
 import App from "./App.tsx"
 import { FormProvider } from "../../react-power-form/src/index.tsx"
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <FormProvider>
-      <App />
-    </FormProvider>
-  </StrictMode>
-)
+const root = document.getElementById("root")
+if (root) {
+  createRoot(root).render(
+    <StrictMode>
+      <FormProvider>
+        <App />
+      </FormProvider>
+    </StrictMode>
+  )
+}

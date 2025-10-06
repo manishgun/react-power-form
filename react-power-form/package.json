@@ -1,7 +1,7 @@
 {
-  "name": "react-power-form",
+  "name": "red-form",
   "version": "1.0.0",
-  "description": "react-power-form",
+  "description": "red-form",
   "main": "index.js",
   "scripts": {
     "build": "tsup",
