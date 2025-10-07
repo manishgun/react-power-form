@@ -1,7 +1,8 @@
 .red-form-conteiner {
   display: block;
   width: 100%;
-  border: 1px solid #e5e7eb;
+  border: 40px solid #d9ecfc;
+  border-radius: 50em;
   border-radius: 12px;
   padding: 32px 40px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
@@ -34,7 +35,7 @@
 }
 
 .red-form-input-container {
-  grid-column: span 6;
+  grid-column: span 4;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -65,7 +66,8 @@
   font-size: 13px;
   border-radius: 6px;
   padding: 10px 20px;
-  width: 350px;
+  width: fit-content;
+  white-space: nowrap;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.4s ease, transform 0.3s ease;
@@ -92,6 +94,7 @@
   color: #555;
   background: #fff;
   transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .red-form-info-icon:hover {
@@ -108,12 +111,15 @@
 }
 
 .red-form-input-base {
-  padding: 12px 14px;
+  height: 38px;
+  padding: 4px 12px;
   background: #f9fafb;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   transition: all 0.2s ease;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+  display: flex;
+  justify-items: center;
 }
 
 .red-form-input-base:hover {
@@ -129,6 +135,8 @@
 
 .red-form-input {
   width: 100%;
+  height: 100%;
+  font-size: large;
   border: none;
   outline: none;
   background: transparent;
@@ -155,7 +163,7 @@
   padding: 12px 28px;
   border: none;
   border-radius: 8px;
-  background: linear-gradient(90deg, #2563eb, #3b82f6);
+  background: linear-gradient(90deg, #2a57eb, #483bf6);
   color: white;
   font-weight: 500;
   font-size: 0.95rem;
@@ -171,6 +179,17 @@
 .red-form-submit-button:active {
   transform: translateY(0);
   box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+}
+
+.red-form-submit-button-disabled {
+  cursor: not-allowed;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  color: rgb(139, 139, 139);
+  background: rgb(234, 234, 234);
+  font-weight: 500;
+  font-size: 0.95rem;
 }
 
 /* 🔹 Responsive Layout */

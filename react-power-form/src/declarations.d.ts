@@ -10,27 +10,133 @@ export type ModalProps = {
   minHeight?: number;
 };
 
+export type InputProps<T extends Schema, K extends keyof T> = { field: K; props: T[K]; form: FormInstance<T>; error: string[] | undefined };
+
 export type BaseField = {
   label: string;
   required?: boolean;
   placeholder?: string;
   helperText?: ReactNode;
   information?: string;
+  disabled?: boolean;
 };
 
 export type FieldSchema =
   | (BaseField & {
       component: "text";
-      initial: string;
+      value: string;
       autoFill?: AutoFillField;
       min?: number;
       max?: number;
     })
   | (BaseField & {
+      component: "email";
+      value: string;
+    })
+  | (BaseField & {
+      component: "search";
+      value: string;
+      autoFill?: AutoFillField;
+    })
+  | (BaseField & {
       component: "number";
-      initial: number;
+      value: number;
       min?: number;
       max?: number;
+      step?: number;
+    })
+  | (BaseField & {
+      component: "password";
+      value: string;
+      min?: number;
+      max?: number;
+    })
+  | (BaseField & {
+      component: "date";
+      value: string;
+      min?: string;
+      max?: string;
+    })
+  | (BaseField & {
+      component: "datetime";
+      value: string;
+      min?: string;
+      max?: string;
+    })
+  | (BaseField & {
+      component: "time";
+      value: string;
+      min?: string;
+      max?: string;
+    })
+  | (BaseField & {
+      component: "week";
+      value: number;
+      min?: number;
+      max?: number;
+    })
+  | (BaseField & {
+      component: "month";
+      value: number;
+      min?: number;
+      max?: number;
+    })
+  | (BaseField & {
+      component: "datetime";
+      value: number;
+      min?: number;
+      max?: number;
+    })
+  | (BaseField & {
+      component: "telephone";
+      value: number;
+      min?: number;
+      max?: number;
+    })
+  | (BaseField & {
+      component: "textarea";
+      value: string;
+      min?: number;
+      max?: number;
+    })
+  | (BaseField & {
+      component: "checkbox";
+      value: 0 | 1;
+    })
+  | (BaseField & {
+      component: "radio";
+      value: number;
+    })
+  | (BaseField & {
+      component: "switch";
+      value: number;
+    })
+  | (BaseField & {
+      component: "range";
+      value: number;
+      min: number;
+      max: number;
+      step?: number;
+    })
+  | (BaseField & {
+      component: "color";
+      value: string;
+    })
+  | (BaseField & {
+      component: "dropdown";
+      value: string;
+    })
+  | (BaseField & {
+      component: "val-dropdown";
+      value: string;
+    })
+  | (BaseField & {
+      component: "tags";
+      value: string;
+    })
+  | (BaseField & {
+      component: "multi-select";
+      value: number;
     });
 
 export type Schema = Record<string, FieldSchema>;
@@ -48,7 +154,7 @@ export type Schema = Record<string, FieldSchema>;
 // };
 
 export type Values<T extends Schema> = {
-  [K in keyof T]: T[K]["required"] extends true ? T[K]["initial"] : T[K]["initial"] | undefined;
+  [K in keyof T]: T[K]["required"] extends true ? T[K]["value"] : T[K]["value"] | undefined;
 };
 
 export type FormProps<T extends Schema> = {
@@ -106,6 +212,8 @@ export interface FormInstance<T extends Schema> {
     name: K;
     value: Values<T>[K];
     id: K;
+    required: boolean;
+    disabled: boolean;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     autoComplete: AutoFill | undefined;
     onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
