@@ -9,6 +9,12 @@ export type ModalProps = {
   height?: number;
   minHeight?: number;
 };
+export type Adorment = {
+  start: ReactNode | undefined;
+  end: ReactNode | undefined;
+};
+
+export type Option = string | { label: string; value: string };
 
 export type InputProps<T extends Schema, K extends keyof T> = { field: K; props: T[K]; form: FormInstance<T>; error: string[] | undefined };
 
@@ -19,125 +25,176 @@ export type BaseField = {
   helperText?: ReactNode;
   information?: string;
   disabled?: boolean;
+  span?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+};
+
+export type TextFieldProps = BaseField & {
+  component: "text";
+  value: string;
+  autoFill?: AutoFillField;
+  min?: number;
+  max?: number;
+  adorment?: Adorment;
+};
+
+export type EmailFieldProps = BaseField & {
+  component: "email";
+  value: string;
+  adorment?: Adorment;
+};
+
+export type SearchFieldProps = BaseField & {
+  component: "search";
+  value: string;
+  autoFill?: AutoFillField;
+  adorment?: Adorment;
+};
+
+export type NumberFieldProps = BaseField & {
+  component: "number";
+  value: number;
+  min?: number;
+  max?: number;
+  step?: number;
+  adorment?: Adorment;
+};
+
+export type PasswordFieldProps = BaseField & {
+  component: "password";
+  value: string;
+  min?: number;
+  max?: number;
+  adorment?: Adorment;
+};
+
+export type DateFieldProps = BaseField & {
+  component: "date";
+  value: string;
+  min?: string;
+  max?: string;
+  adorment?: Adorment;
+};
+
+export type DateTimeFieldProps = BaseField & {
+  component: "datetime";
+  value: string;
+  min?: string;
+  max?: string;
+  adorment?: Adorment;
+};
+
+export type TimeFieldProps = BaseField & {
+  component: "time";
+  value: string;
+  min?: string;
+  max?: string;
+  adorment?: Adorment;
+};
+
+export type WeekFieldProps = BaseField & {
+  component: "week";
+  value: number;
+  min?: number;
+  max?: number;
+  adorment?: Adorment;
+};
+
+export type MonthFieldProps = BaseField & {
+  component: "month";
+  value: number;
+  min?: number;
+  max?: number;
+  adorment?: Adorment;
+};
+
+export type TelephoneFieldProps = BaseField & {
+  component: "telephone";
+  value: number;
+  min?: number;
+  max?: number;
+  adorment?: Adorment;
+};
+
+export type TextAreaFieldProps = BaseField & {
+  component: "textarea";
+  value: string;
+  min?: number;
+  max?: number;
+};
+
+export type CheckboxFieldProps = BaseField & {
+  component: "checkbox";
+  value: string[] | string | undefined;
+  direction?: "row" | "column";
+  options: (string | { label: string; value: string })[];
+};
+
+export type RadioFieldProps = BaseField & {
+  component: "radio";
+  value: string;
+  direction?: "row" | "column";
+  options: Option[];
+};
+
+export type RangeFieldProps = BaseField & {
+  component: "range";
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+};
+
+export type ColorFieldProps = BaseField & {
+  component: "color";
+  value: `#${string}`;
+};
+
+export type SwitchFieldProps = BaseField & {
+  component: "switch";
+  value: false;
+};
+
+export type SelectFieldProps = BaseField & {
+  component: "select";
+  value: string;
+  options: Option[];
+};
+
+export type MultiSelectFieldProps = BaseField & {
+  component: "multi-select";
+  value: string[];
+  options: string[];
+};
+
+export type TagsFieldProps = BaseField & {
+  component: "tags";
+  value: string[];
 };
 
 export type FieldSchema =
-  | (BaseField & {
-      component: "text";
-      value: string;
-      autoFill?: AutoFillField;
-      min?: number;
-      max?: number;
-    })
-  | (BaseField & {
-      component: "email";
-      value: string;
-    })
-  | (BaseField & {
-      component: "search";
-      value: string;
-      autoFill?: AutoFillField;
-    })
-  | (BaseField & {
-      component: "number";
-      value: number;
-      min?: number;
-      max?: number;
-      step?: number;
-    })
-  | (BaseField & {
-      component: "password";
-      value: string;
-      min?: number;
-      max?: number;
-    })
-  | (BaseField & {
-      component: "date";
-      value: string;
-      min?: string;
-      max?: string;
-    })
-  | (BaseField & {
-      component: "datetime";
-      value: string;
-      min?: string;
-      max?: string;
-    })
-  | (BaseField & {
-      component: "time";
-      value: string;
-      min?: string;
-      max?: string;
-    })
-  | (BaseField & {
-      component: "week";
-      value: number;
-      min?: number;
-      max?: number;
-    })
-  | (BaseField & {
-      component: "month";
-      value: number;
-      min?: number;
-      max?: number;
-    })
-  | (BaseField & {
-      component: "datetime";
-      value: number;
-      min?: number;
-      max?: number;
-    })
-  | (BaseField & {
-      component: "telephone";
-      value: number;
-      min?: number;
-      max?: number;
-    })
-  | (BaseField & {
-      component: "textarea";
-      value: string;
-      min?: number;
-      max?: number;
-    })
-  | (BaseField & {
-      component: "checkbox";
-      value: 0 | 1;
-    })
-  | (BaseField & {
-      component: "radio";
-      value: number;
-    })
-  | (BaseField & {
-      component: "switch";
-      value: number;
-    })
-  | (BaseField & {
-      component: "range";
-      value: number;
-      min: number;
-      max: number;
-      step?: number;
-    })
-  | (BaseField & {
-      component: "color";
-      value: string;
-    })
-  | (BaseField & {
-      component: "dropdown";
-      value: string;
-    })
-  | (BaseField & {
-      component: "val-dropdown";
-      value: string;
-    })
-  | (BaseField & {
-      component: "tags";
-      value: string;
-    })
-  | (BaseField & {
-      component: "multi-select";
-      value: number;
-    });
+  | TextFieldProps
+  | EmailFieldProps
+  | SearchFieldProps
+  | SearchFieldProps
+  | PasswordFieldProps
+  | NumberFieldProps
+  | DateFieldProps
+  | DateTimeFieldProps
+  | TimeFieldProps
+  | WeekFieldProps
+  | MonthFieldProps
+  | TimeFieldProps
+  | TimeFieldProps
+  | TelephoneFieldProps
+  | TextAreaFieldProps
+  | CheckboxFieldProps
+  | RadioFieldProps
+  | SwitchFieldProps
+  | RangeFieldProps
+  | ColorFieldProps
+  | SelectFieldProps
+  | MultiSelectFieldProps
+  | TagsFieldProps;
 
 export type Schema = Record<string, FieldSchema>;
 
@@ -161,7 +218,10 @@ export type FormProps<T extends Schema> = {
   // FORM FIELDS
   title?: string | ReactNode;
   description?: ReactNode;
-  onSubmit: (values: Values<T>) => void | Promise<void>;
+  onSubmit?: (values: Values<T>) => void | Promise<void>;
+  onChange?: (values: Values<T>) => void;
+  onError?: (values: Errors<T>) => void;
+  onBlur?: (values: Touched<T>) => void;
   schema: T;
   // DIALOG FIELDS
   open?: boolean;
@@ -210,12 +270,14 @@ export interface FormInstance<T extends Schema> {
     field: K
   ) => {
     name: K;
-    value: Values<T>[K];
+    // value: Values<T>[K];
+    value: string | number | undefined;
     id: K;
     required: boolean;
     disabled: boolean;
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    placeholder: string | undefined;
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
     autoComplete: AutoFill | undefined;
-    onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
+    onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   };
 }

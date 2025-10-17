@@ -4,147 +4,132 @@ function App() {
   return (
     <div style={{ padding: "20px" }}>
       <Form
-        title={"Create Profile"}
+        title={"Create Survey"}
         description="Please fill all the details."
         schema={{
-          textField: {
-            label: "Text Field",
+          name: {
+            label: "name",
             component: "text",
-            value: "Sample text",
-            placeholder: "Enter text",
-            helperText: "Standard text input field",
-            information: "Used for simple text input"
+            value: ""
           },
-          emailField: {
-            label: "Email",
-            component: "email",
-            value: "user@example.com",
-            placeholder: "Enter your email"
+          group: {
+            label: "group",
+            component: "select",
+            value: "",
+            options: ["PRO", "CRO", "eCRF"]
           },
-          searchField: {
-            label: "Search",
-            component: "search",
-            value: "query",
-            placeholder: "Search term"
+          code: {
+            label: "code",
+            component: "text",
+            value: ""
           },
-          numberField: {
-            label: "Number",
-            component: "number",
-            value: 42,
-            min: 0,
-            max: 100,
-            step: 1,
-            helperText: "Enter a number between 0–100"
+          mesures: {
+            label: "mesures",
+            component: "text",
+            value: ""
           },
-          passwordField: {
-            label: "Password",
-            component: "password",
-            value: "secret123",
-            min: 6,
-            max: 20,
-            helperText: "Password must be 6–20 characters"
+          type: {
+            label: "type",
+            component: "select",
+            value: "",
+            options: ["general"]
           },
-          dateField: {
-            label: "Date",
-            component: "date",
-            value: "2025-10-08",
-            min: "2020-01-01",
-            max: "2030-01-01"
+          category: {
+            label: "category",
+            component: "select",
+            value: "",
+            options: ["PRO", "CRO", "eCRF"]
           },
-          datetimeField: {
-            label: "Date & Time",
-            component: "datetime",
-            value: "2025-10-08T12:00",
-            min: "2020-01-01T00:00",
-            max: "2030-01-01T00:00"
+          area: {
+            label: "theraputic area",
+            component: "select",
+            value: "",
+            options: ["PRO", "CRO", "eCRF"]
           },
-          timeField: {
-            label: "Time",
-            component: "time",
-            value: "12:30",
-            min: "08:00",
-            max: "18:00"
+          source: {
+            label: "source",
+            component: "text",
+            value: ""
           },
-          weekField: {
-            label: "Week",
-            component: "week",
-            value: 202540, // year + week
-            min: 202301,
-            max: 202552
-          },
-          monthField: {
-            label: "Month",
-            component: "month",
-            value: 202510,
-            min: 202301,
-            max: 202512
-          },
-          telephoneField: {
-            label: "Telephone",
-            component: "telephone",
-            value: 1234567890,
-            information: "Enter your phone number"
-          },
-          textareaField: {
-            label: "Description",
-            component: "textarea",
-            value: "This is a sample textarea.",
-            min: 0,
-            max: 500,
-            helperText: "Max 500 characters"
-          },
-          checkboxField: {
-            label: "Accept Terms",
-            component: "checkbox",
-            value: 1 // 1 = checked, 0 = unchecked
-          },
-          radioField: {
-            label: "Gender",
-            component: "radio",
-            value: 1 // e.g., 1 = Male, 2 = Female
-          },
-          switchField: {
-            label: "Enable Notifications",
+          branching: {
+            label: "branching",
             component: "switch",
-            value: 0 // off
+            value: false
           },
-          rangeField: {
-            label: "Volume",
+          priority: {
+            label: "priority",
             component: "range",
-            value: 50,
+            value: 0,
             min: 0,
             max: 100,
             step: 1
           },
-          colorField: {
-            label: "Favorite Color",
+          color: {
+            label: "color",
             component: "color",
-            value: "#ff0000"
+            value: "#000000"
           },
-          dropdownField: {
-            label: "Country",
-            component: "dropdown",
-            value: "USA"
+          start: {
+            label: "start date",
+            component: "date",
+            value: ""
           },
-          valDropdownField: {
-            label: "Currency",
-            component: "val-dropdown",
-            value: "USD"
+          "start-time": {
+            label: "start time",
+            component: "time",
+            value: ""
           },
-          tagsField: {
-            label: "Tags",
+          end: {
+            label: "end time",
+            component: "datetime",
+            value: ""
+          },
+          week: {
+            label: "week",
+            component: "week",
+            value: 42
+          },
+          month: {
+            label: "month",
+            component: "month",
+            value: 4
+          },
+          methods: {
+            label: "methods (Multi Pick)",
+            component: "checkbox",
+            options: ["debit card", "credit card", "upi"],
+            value: []
+          },
+          method: {
+            label: "method (Single Pick)",
+            component: "checkbox",
+            options: ["debit card", "credit card", "upi"],
+            value: ""
+          },
+          tags: {
+            label: "tags",
             component: "tags",
-            value: "react,typescript,frontend"
+            value: ["red", "green", "blue", "yellow", "pink", "violate", "orange"],
+            span: 12
           },
-          multiSelectField: {
-            label: "Select Multiple IDs",
+          skills: {
+            label: "skills",
             component: "multi-select",
-            value: 2
+            options: ["red", "green", "blue", "yellow", "pink", "violate", "orange"],
+            value: [],
+            span: 12
+          },
+          comment: {
+            label: "comment",
+            component: "textarea",
+            value: "",
+            span: 12
           }
         }}
-        onSubmit={values => {
-          console.log(values)
-        }}
+        // onSubmit={values => {
+        //   // values.email.length
+        //   console.log(values)
+        // }}
       />
     </div>
   )

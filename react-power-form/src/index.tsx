@@ -1,5 +1,5 @@
 import { Errors, FormContextProps, FormInstance, FormProps, InputProps, ModalProps, Schema, Touched, Values } from "./declarations";
-import React, { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { createContext, Fragment, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import "./index.css";
 
 const FormContext = createContext<FormContextProps>({
@@ -49,7 +49,15 @@ export const FormProvider = ({ children }: { children: ReactNode }) => {
                 : undefined
             }
           >
-            <Form schema={props.schema} onSubmit={props.onSubmit} title={props.title} description={props.description} />
+            <Form
+              schema={props.schema}
+              onSubmit={props.onSubmit}
+              onBlur={props.onBlur}
+              onChange={props.onChange}
+              onError={props.onError}
+              title={props.title}
+              description={props.description}
+            />
           </Modal>
         );
       })}
@@ -181,11 +189,11 @@ export function useForm<T extends Schema>(schema: T, onSubmit: (values: Values<T
     setTouched(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleBlur = <K extends keyof T>(event: React.FocusEvent<HTMLInputElement>) => {
+  const handleBlur = <K extends keyof T>(event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (event.target.name) setTouched(prev => ({ ...prev, [event.target.name as K]: true }));
   };
 
-  const handleChange = <K extends keyof T>(event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = <K extends keyof T>(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     if (event.target.name) setFieldValue(event.target.name as K, event.target.value);
   };
 
@@ -193,9 +201,10 @@ export function useForm<T extends Schema>(schema: T, onSubmit: (values: Values<T
     <K extends keyof T>(key: K) => ({
       name: key,
       id: key,
-      value: values[key],
+      value: typeof values[key] === "number" ? values[key] : values[key] ? values[key].toString() : undefined,
       required: schema[key]["required"] ? true : false,
       disabled: schema[key]["disabled"] ? true : false,
+      placeholder: schema[key]["placeholder"],
       autoComplete: schema[key]["component"] === "text" ? (schema[key]["autoFill"] ? schema[key]["autoFill"] : undefined) : undefined,
       onChange: handleChange,
       onBlur: handleBlur
@@ -271,10 +280,28 @@ export function useForm<T extends Schema>(schema: T, onSubmit: (values: Values<T
   };
 }
 
-const Form = <T extends Schema>({ schema, title, description, onSubmit }: Omit<FormProps<T>, "open" | "close" | "minHeight" | "width" | "height" | "onClose">) => {
+const Form = <T extends Schema>({
+  schema,
+  title,
+  description,
+  onSubmit,
+  onChange,
+  onError,
+  onBlur
+}: Omit<FormProps<T>, "open" | "close" | "minHeight" | "width" | "height" | "onClose">) => {
   const form = useForm(schema, values => {
-    onSubmit(values);
+    if (onSubmit) onSubmit(values);
   });
+
+  useEffect(() => {
+    if (onError) onError(form.errors);
+  }, [form.errors]);
+  useEffect(() => {
+    if (onChange) onChange(form.values);
+  }, [form.values]);
+  useEffect(() => {
+    if (onBlur) onBlur(form.touched);
+  }, [form.touched]);
 
   const disable_submittion = useMemo(() => {
     return Object.keys(form.errors).length > 0 || form.submitting;
@@ -288,11 +315,13 @@ const Form = <T extends Schema>({ schema, title, description, onSubmit }: Omit<F
         {(Object.entries(schema) as [keyof T, T[keyof T]][]).map(([field, props]) => {
           return <InputContainer key={field as string} field={field} props={props} form={form} />;
         })}
-        <div className="red-form-action-area">
-          <button disabled={disable_submittion} className={disable_submittion ? "red-form-submit-button-disabled" : "red-form-submit-button"} type="submit">
-            Submit
-          </button>
-        </div>
+        {onSubmit && (
+          <div className="red-form-action-area">
+            <button disabled={disable_submittion} className={disable_submittion ? "red-form-submit-button-disabled" : "red-form-submit-button"} type="submit">
+              Submit
+            </button>
+          </div>
+        )}
       </form>
     </div>
   );
@@ -301,7 +330,7 @@ const Form = <T extends Schema>({ schema, title, description, onSubmit }: Omit<F
 const InputContainer = <T extends Schema, K extends keyof T>({ field, props, form }: { field: K; props: T[K]; form: FormInstance<T> }) => {
   const error = form.errors[field];
   return (
-    <div className="red-form-input-container">
+    <div className="red-form-input-container" style={{ gridColumn: props.span ? `span ${props.span}` : undefined }}>
       <div className="red-form-input-label-container">
         <label className="red-form-input-label" htmlFor={field as string} style={{ color: error ? "red" : undefined }}>
           {props.label} {props.required && "*"}
@@ -313,7 +342,7 @@ const InputContainer = <T extends Schema, K extends keyof T>({ field, props, for
           </div>
         )}
       </div>
-      <InputBase field={field} props={props} form={form} error={error} />
+      <Input field={field} props={props} form={form} error={error} />
       {error ? (
         <ul style={{ color: error ? "red" : undefined }}>
           {error.map(content => {
@@ -333,41 +362,68 @@ const InputContainer = <T extends Schema, K extends keyof T>({ field, props, for
   );
 };
 
-const InputBase = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
+const Input = <T extends Schema, K extends keyof T>(properties: InputProps<T, K>) => {
+  switch (properties.props.component) {
+    case "radio":
+      return <RadioField {...properties} />;
+    case "checkbox":
+      return <CheckBoxField {...properties} />;
+    case "switch":
+      return <SwitchField {...properties} />;
+    default:
+      return <InputBase {...properties} />;
+  }
+};
+
+const InputBase = <T extends Schema, K extends keyof T>(properties: InputProps<T, K>) => {
   return (
-    <div className="red-form-input-base" style={{ borderColor: error ? "red" : undefined }}>
-      <Input field={field} props={props} form={form} error={error} />
+    <div className="red-form-input-base" style={{ borderColor: properties.error ? "red" : undefined }}>
+      {/* @ts-ignore */}
+      {properties.props.adorment && properties.props.adorment.start && <>{properties.props.adorment.start}</>}
+      <InputField {...properties} />
+      {/* @ts-ignore */}
+      {properties.props.adorment && properties.props.adorment.end && <>{properties.props.adorment.end}</>}
     </div>
   );
 };
 
-const Input = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
+const InputField = <T extends Schema, K extends keyof T>(properties: InputProps<T, K>) => {
   // if (["text", "email", "tel", "password", "number", "date", "datetime-local"].includes(props.component))
-  switch (props.component) {
+  switch (properties.props.component) {
     case "text":
-      return <TextField field={field} props={props} form={form} error={error} />;
+      return <TextField {...properties} />;
+    case "textarea":
+      return <TextAreaField {...properties} />;
     case "search":
-      return <SearchField field={field} props={props} form={form} error={error} />;
+      return <SearchField {...properties} />;
     case "email":
-      return <EmailField field={field} props={props} form={form} error={error} />;
+      return <EmailField {...properties} />;
     case "telephone":
-      return <TelephoneField field={field} props={props} form={form} error={error} />;
+      return <TelephoneField {...properties} />;
     case "password":
-      return <PasswordField field={field} props={props} form={form} error={error} />;
+      return <PasswordField {...properties} />;
     case "number":
-      return <NumberField field={field} props={props} form={form} error={error} />;
+      return <NumberField {...properties} />;
     case "date":
-      return <DateField field={field} props={props} form={form} error={error} />;
+      return <DateField {...properties} />;
     case "datetime":
-      return <DateTimeField field={field} props={props} form={form} error={error} />;
+      return <DateTimeField {...properties} />;
     case "time":
-      return <TimeField field={field} props={props} form={form} error={error} />;
+      return <TimeField {...properties} />;
     case "month":
-      return <MonthField field={field} props={props} form={form} error={error} />;
+      return <MonthField {...properties} />;
     case "week":
-      return <WeekField field={field} props={props} form={form} error={error} />;
+      return <WeekField {...properties} />;
     case "range":
-      return <RangeField field={field} props={props} form={form} error={error} />;
+      return <RangeField {...properties} />;
+    case "color":
+      return <ColorField {...properties} />;
+    case "select":
+      return <SelectField {...properties} />;
+    case "multi-select":
+      return <MultiSelectField {...properties} />;
+    case "tags":
+      return <TagsField {...properties} />;
 
     default:
       return <div>Nothing To Render</div>;
@@ -376,64 +432,321 @@ const Input = <T extends Schema, K extends keyof T>({ field, props, form, error 
 
 const TextField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
   if (props.component !== "text") return null;
-  return <input type="text" placeholder={props.placeholder} className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
+  return <input type="text" className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
 };
 
 const SearchField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
   if (props.component !== "search") return null;
-  return <input type="search" placeholder={props.placeholder} className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
+  return <input type="search" className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
 };
 
 const EmailField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
   if (props.component !== "email") return null;
-  return <input type="email" placeholder={props.placeholder} className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
+  return <input type="email" className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
 };
 
 const TelephoneField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
   if (props.component !== "telephone") return null;
-  return <input type="tel" placeholder={props.placeholder} {...form.getFieldProps(field as string)} className="red-form-input" style={{ color: error ? "red" : undefined }} />;
+  return <input type="tel" {...form.getFieldProps(field as string)} className="red-form-input" style={{ color: error ? "red" : undefined }} />;
 };
 
 const PasswordField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
   if (props.component !== "password") return null;
-  return <input type="password" placeholder={props.placeholder} className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
+  return <input type="password" className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
 };
 
 const NumberField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
   if (props.component !== "number") return null;
-  return <input type="number" placeholder={props.placeholder} className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
+  return <input type="number" className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
 };
 
 const DateField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
   if (props.component !== "date") return null;
-  return <input type="date" placeholder={props.placeholder} className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
+  return <input type="date" className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
 };
 
 const TimeField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
   if (props.component !== "time") return null;
-  return <input type="time" placeholder={props.placeholder} className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
+  return <input type="time" className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
 };
 
 const WeekField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
   if (props.component !== "week") return null;
-  return <input type="week" placeholder={props.placeholder} className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
+  return <input type="week" className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
 };
+
 const MonthField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
   if (props.component !== "month") return null;
-  return <input type="month" placeholder={props.placeholder} className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
+  return <input type="month" className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
 };
 
 const RangeField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
   if (props.component !== "range") return null;
   return (
-    <input type="range" placeholder={props.placeholder} min={props.min} max={props.max} step={props.step} className="red-form-input" {...form.getFieldProps(field as string)} />
+    <div className="red-form-range-field-container">
+      <input type="range" min={props.min} max={props.max} step={props.step} className="red-form-input red-form-range-field" {...form.getFieldProps(field as string)} />
+      <div className="red-form-range-field-value">{form["values"][field]}</div>
+    </div>
   );
 };
 
 const DateTimeField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
   if (props.component !== "datetime") return null;
+  return <input type="datetime-local" className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
+};
+
+const TextAreaField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
+  if (props.component !== "textarea") return null;
+  return <textarea className="red-form-input red-form-textarea" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
+};
+
+const ColorField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
+  if (props.component !== "color") return null;
   return (
-    <input type="datetime-local" placeholder={props.placeholder} className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />
+    <label htmlFor={field as string} style={{ color: error ? "red" : undefined }} className="red-form-color-field-container">
+      <input type="color" className="red-form-color-field" defaultValue={"#000000"} {...form.getFieldProps(field as string)} />
+      <div style={{ background: form.values[field] as string }} className="red-form-color-field-dot"></div>
+      <div className="red-form-color-field-value">{form.values[field]}</div>
+    </label>
+  );
+};
+
+const SelectField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
+  if (props.component !== "select") return null;
+  return (
+    <select id={field as string} value={form.values[field] as string} onChange={e => form.setFieldValue(field, e.target.value)} className="red-form-select-field">
+      <option value={""} className="red-form-select-option">
+        Select {props.label}
+      </option>
+
+      {props.options.map(item => {
+        const label = typeof item === "string" ? item : item.label;
+        const value = typeof item === "string" ? item : item.value;
+        return (
+          <option value={value} key={value} className="red-form-select-option">
+            {label}
+          </option>
+        );
+      })}
+    </select>
+  );
+};
+
+const CheckBoxField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
+  if (props.component !== "checkbox") return null;
+  return (
+    <div style={{ color: error ? "red" : undefined }} className={props.direction === "column" ? "red-form-checkbox-base-column" : "red-form-checkbox-base-row"}>
+      {props.options.map((item, index) => {
+        const label = typeof item === "string" ? item : item.label;
+        const value = typeof item === "string" ? item : item.value;
+        return (
+          <div className="red-form-checkbox-field-item" key={value}>
+            <input
+              type="checkbox"
+              className="red-form-checkbox-field-input"
+              readOnly
+              name={field as string}
+              checked={Array.isArray(form.values[field]) ? form.values[field].includes(value as string) : form.values[field] === value}
+              onClick={() => {
+                if (Array.isArray(form.values[field])) {
+                  if (form.values[field].includes(value)) {
+                    form.setFieldValue(
+                      field,
+                      form.values[field].filter(_value => value !== _value)
+                    );
+                  } else {
+                    form.setFieldValue(field, [...form.values[field], value]);
+                  }
+                } else {
+                  if (form.values[field] === value) {
+                    form.setFieldValue(field, undefined);
+                  } else {
+                    form.setFieldValue(field, value);
+                  }
+                }
+              }}
+            />
+            <div className="red-form-checkbox-field-label">{label}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const RadioField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
+  if (props.component !== "radio") return null;
+  return (
+    <div style={{ color: error ? "red" : undefined }} className={props.direction === "column" ? "red-form-radio-base-column" : "red-form-radio-base-row"}>
+      {props.options.map((item, index) => {
+        const label = typeof item === "string" ? item : item.label;
+        const value = typeof item === "string" ? item : item.value;
+        return (
+          <div className="red-form-radio-field-item" key={value}>
+            <input
+              type="radio"
+              className="red-form-radio-field-input"
+              name={field as string}
+              checked={value === form["values"][field]}
+              value={value}
+              onChange={e => {
+                form.setFieldValue(field, e.target.value);
+              }}
+            />
+            <div className="red-form-radio-field-label">{label}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const SwitchField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
+  if (props.component !== "switch") return null;
+
+  return (
+    <label style={{ color: error ? "red" : undefined }} className="red-form-switch-base">
+      <input type="checkbox" {...form.getFieldProps(field as string)} />
+      <span className="red-form-switch">
+        <span className="red-form-slider"></span>
+      </span>
+    </label>
+  );
+};
+
+const MultiSelectField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
+  if (props.component !== "multi-select") return null;
+  const [input, setInput] = useState("");
+  const [selected_index, set_selected_index] = useState(0);
+
+  useEffect(() => {
+    set_selected_index(0);
+  }, [input]);
+
+  const filterd = props.options.filter(item => {
+    if ((form.values[field] as string[]).includes(item)) return false;
+    return item.toLowerCase().includes(input.toLowerCase());
+  });
+
+  return (
+    <div className="red-form-multi-select-wrapper">
+      <div className="red-form-multi-select-container" style={{ color: error ? "red" : undefined }}>
+        {(form.values[field] as string[]).map(item => {
+          return (
+            <div key={item} className="red-form-multi-select-item">
+              <span>{item}</span>
+              <span
+                className="red-form-multi-select-item-cross"
+                onClick={() => {
+                  form.setFieldValue(
+                    field,
+                    (form.values[field] as string[]).filter((_item: string) => {
+                      return _item !== item;
+                    })
+                  );
+                }}
+              >
+                ×
+              </span>
+            </div>
+          );
+        })}
+        <input
+          value={input}
+          onChange={e => {
+            setInput(e.target.value);
+          }}
+          placeholder={props.placeholder}
+          onKeyDown={e => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              if (filterd[selected_index]) {
+                form.setFieldValue(field, [...(form.values[field] as string[]), filterd[selected_index]]);
+                setInput("");
+              }
+            } else if (e.key === "ArrowDown") {
+              e.preventDefault();
+              if (filterd.length - 1 === selected_index) set_selected_index(0);
+              else set_selected_index(selected_index + 1);
+            } else if (e.key === "ArrowUp") {
+              e.preventDefault();
+              if (selected_index === 0) set_selected_index(filterd.length - 1);
+              else set_selected_index(selected_index - 1);
+            }
+          }}
+          name={field as string}
+          id={field as string}
+          type="text"
+          className="red-form-input red-form-multi-select-input"
+        />
+      </div>
+      {input && filterd.length > 0 && (
+        <div className="red-form-multi-select-suggestion-container">
+          {filterd.map((item, index) => (
+            <div
+              key={item}
+              className={`suggestion-item ${selected_index === index ? "active" : ""}`}
+              onMouseDown={() => {
+                form.setFieldValue(field, [...(form.values[field] as string[]), item]);
+                setInput("");
+              }}
+            >
+              {item}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const TagsField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
+  if (props.component !== "tags") return null;
+  const [input, setInput] = useState<string>("");
+  return (
+    <div className="red-form-tags-container" style={{ color: error ? "red" : undefined }}>
+      {(form.values[field] as string[]).map(item => {
+        return (
+          <div key={item} className="red-form-tags-item">
+            <span>{item}</span>
+            <span
+              className="red-form-tags-item-cross"
+              onClick={() => {
+                form.setFieldValue(
+                  field,
+                  (form.values[field] as string[]).filter((_item: string) => {
+                    return _item !== item;
+                  })
+                );
+              }}
+            >
+              ×
+            </span>
+          </div>
+        );
+      })}
+      <input
+        value={input}
+        onChange={e => {
+          if (e.target.value.endsWith(",")) {
+            form.setFieldValue(field, [...(form.values[field] as string[]), input.trim()]);
+            setInput("");
+          } else setInput(e.target.value);
+        }}
+        placeholder={props.placeholder}
+        onKeyDown={e => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            form.setFieldValue(field, [...(form.values[field] as string[]), input.trim()]);
+            setInput("");
+          }
+        }}
+        name={field as string}
+        id={field as string}
+        type="text"
+        className="red-form-input red-form-tags-input"
+      />
+    </div>
   );
 };
 

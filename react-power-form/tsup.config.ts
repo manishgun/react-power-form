@@ -2,9 +2,10 @@ import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: ["src/index.tsx"],
-  format: ["esm", "cjs"],
+  format: ["esm"],
   dts: true,
-  sourcemap: true,
+  sourcemap: false,
   clean: true,
-  external: ["react", "react-dom"], // Don't bundle React
+  minify: true,
+  external: ["react", "react-dom"] // Don't bundle React
 });
