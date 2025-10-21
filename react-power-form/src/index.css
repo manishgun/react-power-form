@@ -158,6 +158,7 @@
   display: flex;
   justify-content: center;
   margin-top: 36px;
+  gap: 8px;
 }
 
 .red-form-submit-button {
@@ -192,6 +193,20 @@
   background: rgb(234, 234, 234);
   font-weight: 500;
   font-size: 0.95rem;
+}
+
+.red-form-reset-button {
+  cursor: pointer;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  color: #483bf6;
+  background: white;
+  /* border: #483bf6 solid 0.5px; */
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
 }
 
 /* 🔹 Responsive Layout */
@@ -584,4 +599,50 @@ textarea:-webkit-autofill:active {
 .suggestion-item.active,
 .suggestion-item:hover {
   background: #24b9fe70;
+}
+
+.red-form-image-base {
+  border-radius: 6px;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.red-form-image-input {
+  background: #ececec;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  aspect-ratio: 1;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 50px;
+  font-weight: 700;
+  color: #a7a7a7;
+}
+
+.red-form-image-view {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.red-form-image-remove {
+  position: absolute;
+  cursor: pointer;
+  width: 25px;
+  height: 25px;
+  border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #b3b3b3;
+  right: 4px;
+  top: 4px;
+  font-size: 16px;
+  font-weight: 800;
+  color: white;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
 }

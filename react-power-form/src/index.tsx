@@ -169,10 +169,16 @@ export function useForm<T extends Schema>(schema: T, onSubmit: (values: Values<T
     return values;
   }, [schema]);
 
+  const ref = useRef<HTMLInputElement>(null);
   const [values, setValues] = useState<Values<T>>(initialValues);
   const [errors, setErrors] = useState<Errors<T>>({});
   const [touched, setTouched] = useState<Touched<T>>({});
+  const [activeField, set_active_field] = useState<string | undefined>();
   const [submitting, setSubmitting] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (ref && ref.current && activeField === ref.current.name) ref.current.focus();
+  }, [ref, activeField]);
 
   const setFieldValue = <K extends keyof T>(field: K, value: Values<T>[K]) => {
     setValues(prev => ({ ...prev, [field]: value }));
@@ -189,8 +195,20 @@ export function useForm<T extends Schema>(schema: T, onSubmit: (values: Values<T
     setTouched(prev => ({ ...prev, [field]: value }));
   };
 
+  const setFieldActive = <K extends keyof T>(field: K | undefined) => {
+    if (field !== activeField) set_active_field(field as string);
+  };
+
   const handleBlur = <K extends keyof T>(event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    if (event.target.name) setTouched(prev => ({ ...prev, [event.target.name as K]: true }));
+    if (event.target.name) {
+      setTouched(prev => ({ ...prev, [event.target.name as K]: true }));
+      set_active_field(undefined);
+      ref.current = null;
+    }
+  };
+
+  const handleFocus = (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (event.target.name) set_active_field(event.target.name);
   };
 
   const handleChange = <K extends keyof T>(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -207,7 +225,12 @@ export function useForm<T extends Schema>(schema: T, onSubmit: (values: Values<T
       placeholder: schema[key]["placeholder"],
       autoComplete: schema[key]["component"] === "text" ? (schema[key]["autoFill"] ? schema[key]["autoFill"] : undefined) : undefined,
       onChange: handleChange,
-      onBlur: handleBlur
+      onBlur: handleBlur,
+      onFocus: handleFocus,
+      onMouseDown: (e: React.MouseEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        e.stopPropagation();
+      },
+      ref: key === activeField ? ref : undefined
     }),
     [values]
   );
@@ -270,6 +293,10 @@ export function useForm<T extends Schema>(schema: T, onSubmit: (values: Values<T
     setTouched,
     handleBlur,
 
+    setFieldActive,
+    activeField,
+    handleFocus,
+
     handleChange,
 
     handleSubmit,
@@ -308,7 +335,12 @@ const Form = <T extends Schema>({
   }, [form.errors, form.submitting]);
 
   return (
-    <div className="red-form-conteiner">
+    <div
+      className="red-form-conteiner"
+      onMouseDown={() => {
+        form.setFieldActive(undefined);
+      }}
+    >
       {title && <div className="red-form-title">{title}</div>}
       {description && <p className="red-form-description">{description}</p>}
       <form className="red-form" onSubmit={form.handleSubmit}>
@@ -317,6 +349,14 @@ const Form = <T extends Schema>({
         })}
         {onSubmit && (
           <div className="red-form-action-area">
+            <div
+              className={"red-form-reset-button"}
+              onClick={() => {
+                form.resetForm();
+              }}
+            >
+              Reset
+            </div>
             <button disabled={disable_submittion} className={disable_submittion ? "red-form-submit-button-disabled" : "red-form-submit-button"} type="submit">
               Submit
             </button>
@@ -370,6 +410,8 @@ const Input = <T extends Schema, K extends keyof T>(properties: InputProps<T, K>
       return <CheckBoxField {...properties} />;
     case "switch":
       return <SwitchField {...properties} />;
+    case "image":
+      return <ImageField {...properties} />;
     default:
       return <InputBase {...properties} />;
   }
@@ -497,6 +539,7 @@ const DateTimeField = <T extends Schema, K extends keyof T>({ field, props, form
 
 const TextAreaField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
   if (props.component !== "textarea") return null;
+  // @ts-ignore
   return <textarea className="red-form-input red-form-textarea" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
 };
 
@@ -504,7 +547,7 @@ const ColorField = <T extends Schema, K extends keyof T>({ field, props, form, e
   if (props.component !== "color") return null;
   return (
     <label htmlFor={field as string} style={{ color: error ? "red" : undefined }} className="red-form-color-field-container">
-      <input type="color" className="red-form-color-field" defaultValue={"#000000"} {...form.getFieldProps(field as string)} />
+      <input type="color" className="red-form-color-field" {...form.getFieldProps(field as string)} />
       <div style={{ background: form.values[field] as string }} className="red-form-color-field-dot"></div>
       <div className="red-form-color-field-value">{form.values[field]}</div>
     </label>
@@ -581,16 +624,25 @@ const RadioField = <T extends Schema, K extends keyof T>({ field, props, form, e
       {props.options.map((item, index) => {
         const label = typeof item === "string" ? item : item.label;
         const value = typeof item === "string" ? item : item.value;
+
+        const toggle = () => {
+          if (form["values"][field] === value) form.setFieldValue(field, "");
+          else form.setFieldValue(field, value);
+        };
+
         return (
           <div className="red-form-radio-field-item" key={value}>
             <input
               type="radio"
+              readOnly
               className="red-form-radio-field-input"
               name={field as string}
               checked={value === form["values"][field]}
               value={value}
-              onChange={e => {
-                form.setFieldValue(field, e.target.value);
+              onClick={toggle}
+              onKeyUp={e => {
+                e.preventDefault();
+                if (e.key === " ") toggle();
               }}
             />
             <div className="red-form-radio-field-label">{label}</div>
@@ -619,14 +671,30 @@ const MultiSelectField = <T extends Schema, K extends keyof T>({ field, props, f
   const [input, setInput] = useState("");
   const [selected_index, set_selected_index] = useState(0);
 
+  const map = useMemo(() => {
+    return props.options.reduce((previous, current) => {
+      if (typeof current === "string") {
+        previous[current] = current;
+      } else {
+        previous[current.value] = current.label;
+      }
+      return previous;
+    }, {} as Record<string, string>);
+  }, [props.options]);
+
+  const values = useMemo(() => Object.keys(map), [map]);
+  const filterd = useMemo(() => {
+    return values
+      .filter(item => {
+        if ((form.values[field] as string[]).includes(item)) return false;
+        return item.toLowerCase().includes(input.toLowerCase());
+      })
+      .slice(0, 3);
+  }, [input, values, form.values[field]]);
+
   useEffect(() => {
     set_selected_index(0);
-  }, [input]);
-
-  const filterd = props.options.filter(item => {
-    if ((form.values[field] as string[]).includes(item)) return false;
-    return item.toLowerCase().includes(input.toLowerCase());
-  });
+  }, [input, filterd]);
 
   return (
     <div className="red-form-multi-select-wrapper">
@@ -634,16 +702,23 @@ const MultiSelectField = <T extends Schema, K extends keyof T>({ field, props, f
         {(form.values[field] as string[]).map(item => {
           return (
             <div key={item} className="red-form-multi-select-item">
-              <span>{item}</span>
+              <span>{map[item]}</span>
               <span
                 className="red-form-multi-select-item-cross"
-                onClick={() => {
+                onMouseDown={e => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+                onClick={e => {
+                  e.stopPropagation();
+                  e.preventDefault();
                   form.setFieldValue(
                     field,
                     (form.values[field] as string[]).filter((_item: string) => {
                       return _item !== item;
                     })
                   );
+                  // form.setFieldActive(field);
                 }}
               >
                 ×
@@ -652,11 +727,14 @@ const MultiSelectField = <T extends Schema, K extends keyof T>({ field, props, f
           );
         })}
         <input
+          {...form.getFieldProps(field as string)}
           value={input}
           onChange={e => {
             setInput(e.target.value);
           }}
-          placeholder={props.placeholder}
+          onBlur={() => {}}
+          required={false}
+          autoComplete="off"
           onKeyDown={e => {
             if (e.key === "Enter") {
               e.preventDefault();
@@ -672,26 +750,28 @@ const MultiSelectField = <T extends Schema, K extends keyof T>({ field, props, f
               e.preventDefault();
               if (selected_index === 0) set_selected_index(filterd.length - 1);
               else set_selected_index(selected_index - 1);
+            } else if (e.key === "Backspace" && input === "") {
+              form.setFieldValue(field, [...(form.values[field] as string[])].slice(0, -1));
             }
           }}
-          name={field as string}
-          id={field as string}
           type="text"
           className="red-form-input red-form-multi-select-input"
         />
       </div>
-      {input && filterd.length > 0 && (
+      {form.activeField === field && filterd.length > 0 && (
         <div className="red-form-multi-select-suggestion-container">
           {filterd.map((item, index) => (
             <div
               key={item}
               className={`suggestion-item ${selected_index === index ? "active" : ""}`}
-              onMouseDown={() => {
+              onMouseDown={e => {
+                e.stopPropagation();
+                e.preventDefault();
                 form.setFieldValue(field, [...(form.values[field] as string[]), item]);
                 setInput("");
               }}
             >
-              {item}
+              {map[item]}
             </div>
           ))}
         </div>
@@ -739,6 +819,8 @@ const TagsField = <T extends Schema, K extends keyof T>({ field, props, form, er
             e.preventDefault();
             form.setFieldValue(field, [...(form.values[field] as string[]), input.trim()]);
             setInput("");
+          } else if (e.key === "Backspace" && input === "") {
+            form.setFieldValue(field, [...(form.values[field] as string[])].slice(0, -1));
           }
         }}
         name={field as string}
@@ -746,6 +828,48 @@ const TagsField = <T extends Schema, K extends keyof T>({ field, props, form, er
         type="text"
         className="red-form-input red-form-tags-input"
       />
+    </div>
+  );
+};
+
+const ImageField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
+  if (props.component !== "image") return null;
+
+  return (
+    <div className="red-form-image-base">
+      {form.values[field] ? (
+        <>
+          <span
+            className="red-form-image-remove"
+            onClick={() => {
+              form.setFieldValue(field, "");
+            }}
+          >
+            ×
+          </span>
+          <img className="red-form-image-view" src={form.values[field] as string} />
+        </>
+      ) : (
+        <label htmlFor={field as string} className="red-form-image-input">
+          +
+          <input
+            type="file"
+            {...form.getFieldProps(field as string)}
+            value={undefined}
+            onChange={e => {
+              if (e.target.files && e.target.files.length === 1) {
+                const file = e.target.files.item(0);
+                if (file && props.onSelect)
+                  props.onSelect(file).then(url => {
+                    form.setFieldValue(field, url);
+                  });
+                e.target.files = null;
+              }
+            }}
+            style={{ display: "none" }}
+          />
+        </label>
+      )}
     </div>
   );
 };

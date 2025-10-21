@@ -163,12 +163,18 @@ export type SelectFieldProps = BaseField & {
 export type MultiSelectFieldProps = BaseField & {
   component: "multi-select";
   value: string[];
-  options: string[];
+  options: Option[];
 };
 
 export type TagsFieldProps = BaseField & {
   component: "tags";
   value: string[];
+};
+
+export type ImageFieldProps = BaseField & {
+  component: "image";
+  value: string;
+  onSelect: (file: File) => Promise<string>;
 };
 
 export type FieldSchema =
@@ -194,7 +200,8 @@ export type FieldSchema =
   | ColorFieldProps
   | SelectFieldProps
   | MultiSelectFieldProps
-  | TagsFieldProps;
+  | TagsFieldProps
+  | ImageFieldProps;
 
 export type Schema = Record<string, FieldSchema>;
 
@@ -257,6 +264,10 @@ export interface FormInstance<T extends Schema> {
   setTouched: Dispatch<SetStateAction<Partial<Record<keyof T, boolean>>>>;
   handleBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
 
+  activeField: string | undefined;
+  setFieldActive: <K extends keyof T>(field: K | undefined) => void;
+  handleFocus: (e: React.FocusEvent<HTMLInputElement>) => void;
+
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 
   handleSubmit: (e: React.FormEvent) => void;
@@ -275,9 +286,12 @@ export interface FormInstance<T extends Schema> {
     id: K;
     required: boolean;
     disabled: boolean;
+    ref: React.RefObject<HTMLInputElement | null> | undefined;
     placeholder: string | undefined;
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
     autoComplete: AutoFill | undefined;
     onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    onFocus: (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    onMouseDown: (e: React.MouseEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   };
 }

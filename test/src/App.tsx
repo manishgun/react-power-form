@@ -7,6 +7,55 @@ function App() {
         title={"Create Survey"}
         description="Please fill all the details."
         schema={{
+          avatar: {
+            label: "avatar",
+            component: "image",
+            value: "",
+            onSelect: async file => {
+              return new Promise(resolve => {
+                const reader = new FileReader()
+                reader.onloadend = () => {
+                  resolve(reader.result as string)
+                }
+                reader.readAsDataURL(file)
+              })
+            },
+            span: 2
+          },
+          tags: {
+            label: "tags",
+            component: "tags",
+            value: ["red", "green", "blue", "yellow", "pink", "violate", "orange"],
+            span: 12
+          },
+          skills: {
+            label: "skills",
+            component: "multi-select",
+            options: [
+              {
+                value: "1",
+                label: "one"
+              },
+              {
+                value: "2",
+                label: "two"
+              },
+              {
+                value: "3",
+                label: "three"
+              },
+              {
+                value: "4",
+                label: "four"
+              },
+              {
+                value: "5",
+                label: "five"
+              }
+            ],
+            value: [],
+            span: 12
+          },
           name: {
             label: "name",
             component: "text",
@@ -106,18 +155,12 @@ function App() {
             options: ["debit card", "credit card", "upi"],
             value: ""
           },
-          tags: {
-            label: "tags",
-            component: "tags",
-            value: ["red", "green", "blue", "yellow", "pink", "violate", "orange"],
-            span: 12
-          },
-          skills: {
-            label: "skills",
-            component: "multi-select",
-            options: ["red", "green", "blue", "yellow", "pink", "violate", "orange"],
-            value: [],
-            span: 12
+
+          gender: {
+            label: "gender",
+            component: "radio",
+            options: ["Male", "Female", "Other"],
+            value: ""
           },
           comment: {
             label: "comment",
@@ -126,10 +169,10 @@ function App() {
             span: 12
           }
         }}
-        // onSubmit={values => {
-        //   // values.email.length
-        //   console.log(values)
-        // }}
+        onSubmit={values => {
+          // values.email.length
+          console.log(values)
+        }}
       />
     </div>
   )
