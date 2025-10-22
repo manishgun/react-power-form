@@ -629,20 +629,25 @@ textarea:-webkit-autofill:active {
   object-fit: cover;
 }
 
-.red-form-image-remove {
+.red-form-image-remove-base {
   position: absolute;
   cursor: pointer;
   width: 25px;
   height: 25px;
   border-radius: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   background: #b3b3b3;
   right: 4px;
   top: 4px;
-  font-size: 16px;
-  font-weight: 800;
-  color: white;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  opacity: 0.6;
+}
+
+.red-form-image-remove-button {
+  position: absolute;
+  top: -3px;
+  right: 8px;
+  font-size: 22px;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
 }

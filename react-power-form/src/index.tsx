@@ -839,14 +839,16 @@ const ImageField = <T extends Schema, K extends keyof T>({ field, props, form, e
     <div className="red-form-image-base">
       {form.values[field] ? (
         <>
-          <span
-            className="red-form-image-remove"
+          <div className="red-form-image-remove-base" />
+          <div
+            className="red-form-image-remove-button"
             onClick={() => {
               form.setFieldValue(field, "");
             }}
           >
             ×
-          </span>
+          </div>
+
           <img className="red-form-image-view" src={form.values[field] as string} />
         </>
       ) : (
