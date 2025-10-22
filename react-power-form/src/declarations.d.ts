@@ -151,7 +151,7 @@ export type ColorFieldProps = BaseField & {
 
 export type SwitchFieldProps = BaseField & {
   component: "switch";
-  value: false;
+  value: boolean;
 };
 
 export type SelectFieldProps = BaseField & {

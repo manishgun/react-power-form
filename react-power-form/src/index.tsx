@@ -99,7 +99,7 @@ export const useModalForm = <T extends Schema>(schema: T, options: Omit<FormProp
   return utils;
 };
 
-const Modal = (props: ModalProps) => {
+export const Modal = (props: ModalProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
   // Lock body scroll when dialog is open
@@ -369,8 +369,9 @@ const Form = <T extends Schema>({
 
 const InputContainer = <T extends Schema, K extends keyof T>({ field, props, form }: { field: K; props: T[K]; form: FormInstance<T> }) => {
   const error = form.errors[field];
+  if (props.disabled && !props.information) props.information = "Disabled!";
   return (
-    <div className="red-form-input-container" style={{ gridColumn: props.span ? `span ${props.span}` : undefined }}>
+    <div className="red-form-input-container" style={{ gridColumn: props.span ? `span ${props.span}` : undefined, cursor: props.disabled ? "not-allowed" : undefined }}>
       <div className="red-form-input-label-container">
         <label className="red-form-input-label" htmlFor={field as string} style={{ color: error ? "red" : undefined }}>
           {props.label} {props.required && "*"}
@@ -557,7 +558,12 @@ const ColorField = <T extends Schema, K extends keyof T>({ field, props, form, e
 const SelectField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
   if (props.component !== "select") return null;
   return (
-    <select id={field as string} value={form.values[field] as string} onChange={e => form.setFieldValue(field, e.target.value)} className="red-form-select-field">
+    <select
+      id={field as string}
+      value={form.values[field] as string}
+      onChange={e => form.setFieldValue(field, e.target.value)}
+      className={`red-form-select-field ${props.disabled && "red-form-select-field-disabled"}`}
+    >
       <option value={""} className="red-form-select-option">
         Select {props.label}
       </option>
@@ -658,7 +664,7 @@ const SwitchField = <T extends Schema, K extends keyof T>({ field, props, form, 
 
   return (
     <label style={{ color: error ? "red" : undefined }} className="red-form-switch-base">
-      <input type="checkbox" {...form.getFieldProps(field as string)} />
+      <input type="checkbox" {...form.getFieldProps(field as string)} checked={form.values[field] as boolean} />
       <span className="red-form-switch">
         <span className="red-form-slider"></span>
       </span>

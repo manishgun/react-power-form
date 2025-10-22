@@ -1,7 +1,9 @@
-import Form from "../../react-power-form/src/index"
+import Form, { Modal } from "../../react-power-form/src/index"
 
 function App() {
   return (
+    // <Modal isOpen={true}>
+    //   <div style={{ maxHeight: "600px", overflow: "auto" }}>
     <div style={{ padding: "20px" }}>
       <Form
         title={"Create Survey"}
@@ -54,12 +56,14 @@ function App() {
               }
             ],
             value: [],
+            information: "This is a multiple select input",
             span: 12
           },
           name: {
             label: "name",
             component: "text",
-            value: ""
+            value: "",
+            required: true
           },
           group: {
             label: "group",
@@ -87,7 +91,8 @@ function App() {
             label: "category",
             component: "select",
             value: "",
-            options: ["PRO", "CRO", "eCRF"]
+            options: ["PRO", "CRO", "eCRF"],
+            disabled: true
           },
           area: {
             label: "theraputic area",
@@ -98,17 +103,19 @@ function App() {
           source: {
             label: "source",
             component: "text",
-            value: ""
+            value: "",
+            disabled: true
           },
           branching: {
             label: "branching",
             component: "switch",
-            value: false
+            value: true,
+            disabled: true
           },
           priority: {
             label: "priority",
             component: "range",
-            value: 0,
+            value: 20,
             min: 0,
             max: 100,
             step: 1
@@ -175,6 +182,8 @@ function App() {
         }}
       />
     </div>
+    //   </div>
+    // </Modal>
   )
 }
 
