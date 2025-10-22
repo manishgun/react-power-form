@@ -163,8 +163,8 @@ export const Modal = (props: ModalProps) => {
 export function useForm<T extends Schema>(schema: T, onSubmit: (values: Values<T>) => void): FormInstance<T> {
   const initialValues = useMemo(() => {
     const values = {} as Values<T>;
-    (Object.entries(schema) as [keyof T, T[keyof T]][]).forEach(([key, field]) => {
-      values[key] = field.value as Values<T>[keyof T];
+    (Object.entries(schema) as [keyof T, T[keyof T]][]).forEach(([key, props]) => {
+      values[key] = props.value as Values<T>[keyof T];
     });
     return values;
   }, [schema]);
@@ -219,7 +219,8 @@ export function useForm<T extends Schema>(schema: T, onSubmit: (values: Values<T
     <K extends keyof T>(key: K) => ({
       name: key,
       id: key,
-      value: typeof values[key] === "number" ? values[key] : values[key] ? values[key].toString() : undefined,
+      // value: typeof values[key] === "number" ? values[key] : values[key] ? values[key].toString() : "",
+      value: values[key],
       required: schema[key]["required"] ? true : false,
       disabled: schema[key]["disabled"] ? true : false,
       placeholder: schema[key]["placeholder"],
@@ -349,15 +350,16 @@ const Form = <T extends Schema>({
         })}
         {onSubmit && (
           <div className="red-form-action-area">
-            <div
-              className={"red-form-reset-button"}
-              onClick={() => {
+            <button
+              className={"red-form-button red-form-reset-button"}
+              onClick={e => {
+                e.preventDefault();
                 form.resetForm();
               }}
             >
               Reset
-            </div>
-            <button disabled={disable_submittion} className={disable_submittion ? "red-form-submit-button-disabled" : "red-form-submit-button"} type="submit">
+            </button>
+            <button disabled={disable_submittion} className={`red-form-button ${disable_submittion ? "red-form-submit-button-disabled" : "red-form-submit-button"}`} type="submit">
               Submit
             </button>
           </div>
@@ -475,6 +477,8 @@ const InputField = <T extends Schema, K extends keyof T>(properties: InputProps<
 
 const TextField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
   if (props.component !== "text") return null;
+  // console.log(form.getFieldProps(field as string));
+
   return <input type="text" className="red-form-input" {...form.getFieldProps(field as string)} style={{ color: error ? "red" : undefined }} />;
 };
 
@@ -490,6 +494,7 @@ const EmailField = <T extends Schema, K extends keyof T>({ field, props, form, e
 
 const TelephoneField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
   if (props.component !== "telephone") return null;
+
   return <input type="tel" {...form.getFieldProps(field as string)} className="red-form-input" style={{ color: error ? "red" : undefined }} />;
 };
 
@@ -664,7 +669,14 @@ const SwitchField = <T extends Schema, K extends keyof T>({ field, props, form, 
 
   return (
     <label style={{ color: error ? "red" : undefined }} className="red-form-switch-base">
-      <input type="checkbox" {...form.getFieldProps(field as string)} checked={form.values[field] as boolean} />
+      <input
+        type="checkbox"
+        {...form.getFieldProps(field as string)}
+        checked={form.values[field] as boolean}
+        onChange={e => {
+          form.setFieldValue(field, e.target.checked);
+        }}
+      />
       <span className="red-form-switch">
         <span className="red-form-slider"></span>
       </span>
@@ -842,7 +854,7 @@ const ImageField = <T extends Schema, K extends keyof T>({ field, props, form, e
   if (props.component !== "image") return null;
 
   return (
-    <div className="red-form-image-base">
+    <div className="red-form-image-base" style={{ borderColor: error ? "red" : undefined }}>
       {form.values[field] ? (
         <>
           <div className="red-form-image-remove-base" />
@@ -858,7 +870,7 @@ const ImageField = <T extends Schema, K extends keyof T>({ field, props, form, e
           <img className="red-form-image-view" src={form.values[field] as string} />
         </>
       ) : (
-        <label htmlFor={field as string} className="red-form-image-input">
+        <label htmlFor={field as string} className="red-form-image-input" style={{ color: error ? "red" : undefined }}>
           +
           <input
             type="file"

@@ -1,10 +1,10 @@
-import Form, { Modal } from "../../react-power-form/src/index"
+import Form from "../../react-power-form/src/index"
 
 function App() {
   return (
     // <Modal isOpen={true}>
     //   <div style={{ maxHeight: "600px", overflow: "auto" }}>
-    <div style={{ padding: "20px" }}>
+    <div /* style={{ padding: "20px" }} */>
       <Form
         title={"Create Survey"}
         description="Please fill all the details."
@@ -22,7 +22,8 @@ function App() {
                 reader.readAsDataURL(file)
               })
             },
-            span: 2
+            span: 2,
+            required: true
           },
           tags: {
             label: "tags",
@@ -63,6 +64,7 @@ function App() {
             label: "name",
             component: "text",
             value: "",
+            autoFill: "name",
             required: true
           },
           group: {
@@ -91,8 +93,7 @@ function App() {
             label: "category",
             component: "select",
             value: "",
-            options: ["PRO", "CRO", "eCRF"],
-            disabled: true
+            options: ["PRO", "CRO", "eCRF"]
           },
           area: {
             label: "theraputic area",
@@ -103,14 +104,12 @@ function App() {
           source: {
             label: "source",
             component: "text",
-            value: "",
-            disabled: true
+            value: ""
           },
           branching: {
             label: "branching",
             component: "switch",
-            value: true,
-            disabled: true
+            value: false
           },
           priority: {
             label: "priority",
@@ -128,27 +127,27 @@ function App() {
           start: {
             label: "start date",
             component: "date",
-            value: ""
+            value: "2025-10-16"
           },
           "start-time": {
             label: "start time",
             component: "time",
-            value: ""
+            value: "19:09"
           },
           end: {
             label: "end time",
             component: "datetime",
-            value: ""
+            value: "2025-10-17T19:09"
           },
           week: {
             label: "week",
             component: "week",
-            value: 42
+            value: "2025-W42"
           },
           month: {
             label: "month",
             component: "month",
-            value: 4
+            value: "2025-10"
           },
           methods: {
             label: "methods (Multi Pick)",

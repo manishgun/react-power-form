@@ -69,7 +69,7 @@ export type PasswordFieldProps = BaseField & {
 
 export type DateFieldProps = BaseField & {
   component: "date";
-  value: string;
+  value: `${1 | 2}${number}${number}${number}-${0 | 1}${number}-${0 | 1 | 2 | 3}${number}`;
   min?: string;
   max?: string;
   adorment?: Adorment;
@@ -77,7 +77,7 @@ export type DateFieldProps = BaseField & {
 
 export type DateTimeFieldProps = BaseField & {
   component: "datetime";
-  value: string;
+  value: `${1 | 2}${number}${number}${number}-${0 | 1}${number}-${0 | 1 | 2 | 3}${number}T${0 | 1 | 2}${number}:${0 | 1 | 2 | 3 | 4 | 5 | 6}${number}`;
   min?: string;
   max?: string;
   adorment?: Adorment;
@@ -85,7 +85,7 @@ export type DateTimeFieldProps = BaseField & {
 
 export type TimeFieldProps = BaseField & {
   component: "time";
-  value: string;
+  value: `${0 | 1 | 2}${number}:${0 | 1 | 2 | 3 | 4 | 5 | 6}${number}`;
   min?: string;
   max?: string;
   adorment?: Adorment;
@@ -93,7 +93,7 @@ export type TimeFieldProps = BaseField & {
 
 export type WeekFieldProps = BaseField & {
   component: "week";
-  value: number;
+  value: `${number}${number}${number}${number}-W${number}${number}`;
   min?: number;
   max?: number;
   adorment?: Adorment;
@@ -101,7 +101,7 @@ export type WeekFieldProps = BaseField & {
 
 export type MonthFieldProps = BaseField & {
   component: "month";
-  value: number;
+  value: `${1 | 2}${number}${number}${number}-${0 | 1}${number}`;
   min?: number;
   max?: number;
   adorment?: Adorment;
@@ -282,7 +282,7 @@ export interface FormInstance<T extends Schema> {
   ) => {
     name: K;
     // value: Values<T>[K];
-    value: string | number | undefined;
+    value: T[K]["value"] | undefined | any;
     id: K;
     required: boolean;
     disabled: boolean;
