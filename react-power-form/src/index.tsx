@@ -2,163 +2,21 @@ import { Errors, FormContextProps, FormInstance, FormProps, InputProps, ModalPro
 import React, { createContext, Fragment, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import "./index.css";
 
+function injectCss(path: string) {
+  if (typeof document !== "undefined") {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = path;
+    document.head.appendChild(link);
+  }
+}
+
+injectCss(new URL("./index.css", import.meta.url).toString());
+
 const FormContext = createContext<FormContextProps>({
   open: () => 0,
   close: () => {}
 });
-
-export const FormProvider = ({ children }: { children: ReactNode }) => {
-  const [forms, setForms] = useState<Record<number, FormProps<any>>>({});
-
-  const formValues = useMemo(() => Object.entries(forms), [forms]);
-
-  const open = <T extends Schema>(props: FormProps<T>) => {
-    const id = Date.now();
-    setForms(prev => ({ ...prev, [id]: props }));
-    return id;
-  };
-
-  const close = (id: number) => {
-    setForms(prev => {
-      const updated = { ...prev };
-      const onClose = updated[id].onClose;
-      setTimeout(() => {
-        onClose();
-      }, 50);
-      delete updated[id];
-      return updated;
-    });
-  };
-
-  return (
-    <FormContext.Provider value={{ open, close }}>
-      {formValues.map(([key, props]) => {
-        const id = Number(key);
-        return (
-          <Modal
-            key={id}
-            isOpen={true}
-            height={props.height}
-            width={props.width}
-            minHeight={props.minHeight}
-            onClose={
-              props.close !== false
-                ? () => {
-                    close(id);
-                  }
-                : undefined
-            }
-          >
-            <Form
-              schema={props.schema}
-              onSubmit={props.onSubmit}
-              onBlur={props.onBlur}
-              onChange={props.onChange}
-              onError={props.onError}
-              title={props.title}
-              description={props.description}
-            />
-          </Modal>
-        );
-      })}
-      {children}
-    </FormContext.Provider>
-  );
-};
-
-export const useModalForm = <T extends Schema>(schema: T, options: Omit<FormProps<T>, "schema" | "onClose">) => {
-  const [remember, setRemember] = useState<{ id?: number; props?: FormProps<T> }>({});
-  const { open, close } = useContext(FormContext);
-
-  const utils = {
-    open: () => {
-      if (!remember.id) {
-        const value = {
-          ...options,
-          schema,
-          onClose: () => {
-            setRemember({});
-          }
-        };
-        const id = open(value);
-        setRemember({ id, props: value });
-      }
-    },
-    close: () => {
-      if (remember.id && options.close !== false) {
-        close(remember.id);
-        setRemember({});
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (options.open && JSON.stringify(remember.props) !== JSON.stringify(options)) utils.open();
-  }, []);
-
-  return utils;
-};
-
-export const Modal = (props: ModalProps) => {
-  const ref = useRef<HTMLDivElement>(null);
-
-  // Lock body scroll when dialog is open
-  useEffect(() => {
-    if (props.isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [props.isOpen]);
-
-  // Close on "Escape" key
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && props.onClose) props.onClose();
-    };
-    if (props.isOpen) window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [props.isOpen, props.onClose]);
-
-  // Close when clicking outside
-  const handleClickOutside = (event: React.MouseEvent) => {
-    if (ref.current && !ref.current.contains(event.target as Node)) {
-      if (props.onClose) props.onClose();
-    }
-  };
-
-  if (!props.isOpen) return null;
-
-  return (
-    <div onClick={handleClickOutside} className="red-form-modal-background">
-      <div
-        className="red-form-modal"
-        ref={ref}
-        style={{
-          width: props.width,
-          minHeight: props.minHeight,
-          height: props.height
-        }}
-      >
-        <div className="red-form-modal-header">
-          <div className="red-form-modal-title">{props.title}</div>
-          {props.onClose && (
-            <button onClick={props.onClose} className="red-form-modal-close-button" aria-label="Close">
-              ×
-            </button>
-          )}
-        </div>
-        <div style={{ flex: 1 }} className="red-form-modal-container">
-          {props.children}
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export function useForm<T extends Schema>(schema: T, onSubmit: (values: Values<T>) => void): FormInstance<T> {
   const initialValues = useMemo(() => {
@@ -244,7 +102,7 @@ export function useForm<T extends Schema>(schema: T, onSubmit: (values: Values<T
       const fieldErrors: string[] = [];
 
       if (field.required && (value === undefined || value === "" || (Array.isArray(value) && value.length === 0))) {
-        fieldErrors.push(`${String(field.label)} is required`);
+        fieldErrors.push(`${String(field.label)} is required.`);
       }
 
       if (fieldErrors.length > 0) newErrors[key] = fieldErrors;
@@ -909,6 +767,159 @@ const ImageField = <T extends Schema, K extends keyof T>({ field, props, form, e
           />
         </label>
       )}
+    </div>
+  );
+};
+
+export const FormProvider = ({ children }: { children: ReactNode }) => {
+  const [forms, setForms] = useState<Record<number, FormProps<any>>>({});
+
+  const formValues = useMemo(() => Object.entries(forms), [forms]);
+
+  const open = <T extends Schema>(props: FormProps<T>) => {
+    const id = Date.now();
+    setForms(prev => ({ ...prev, [id]: props }));
+    return id;
+  };
+
+  const close = (id: number) => {
+    setForms(prev => {
+      const updated = { ...prev };
+      const onClose = updated[id].onClose;
+      setTimeout(() => {
+        onClose();
+      }, 50);
+      delete updated[id];
+      return updated;
+    });
+  };
+
+  return (
+    <FormContext.Provider value={{ open, close }}>
+      {formValues.map(([key, props]) => {
+        const id = Number(key);
+        return (
+          <Modal
+            key={id}
+            isOpen={true}
+            height={props.height}
+            width={props.width}
+            minHeight={props.minHeight}
+            onClose={
+              props.close !== false
+                ? () => {
+                    close(id);
+                  }
+                : undefined
+            }
+          >
+            <Form
+              schema={props.schema}
+              onSubmit={props.onSubmit}
+              onBlur={props.onBlur}
+              onChange={props.onChange}
+              onError={props.onError}
+              title={props.title}
+              description={props.description}
+            />
+          </Modal>
+        );
+      })}
+      {children}
+    </FormContext.Provider>
+  );
+};
+
+export const useModalForm = <T extends Schema>(schema: T, options: Omit<FormProps<T>, "schema" | "onClose">) => {
+  const [remember, setRemember] = useState<{ id?: number; props?: FormProps<T> }>({});
+  const { open, close } = useContext(FormContext);
+
+  const utils = {
+    open: () => {
+      if (!remember.id) {
+        const value = {
+          ...options,
+          schema,
+          onClose: () => {
+            setRemember({});
+          }
+        };
+        const id = open(value);
+        setRemember({ id, props: value });
+      }
+    },
+    close: () => {
+      if (remember.id && options.close !== false) {
+        close(remember.id);
+        setRemember({});
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (options.open && JSON.stringify(remember.props) !== JSON.stringify(options)) utils.open();
+  }, []);
+
+  return utils;
+};
+
+export const Modal = (props: ModalProps) => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Lock body scroll when dialog is open
+  useEffect(() => {
+    if (props.isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [props.isOpen]);
+
+  // Close on "Escape" key
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && props.onClose) props.onClose();
+    };
+    if (props.isOpen) window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [props.isOpen, props.onClose]);
+
+  // Close when clicking outside
+  const handleClickOutside = (event: React.MouseEvent) => {
+    if (ref.current && !ref.current.contains(event.target as Node)) {
+      if (props.onClose) props.onClose();
+    }
+  };
+
+  if (!props.isOpen) return null;
+
+  return (
+    <div onClick={handleClickOutside} className="red-form-modal-background">
+      <div
+        className="red-form-modal"
+        ref={ref}
+        style={{
+          width: props.width,
+          minHeight: props.minHeight,
+          height: props.height
+        }}
+      >
+        <div className="red-form-modal-header">
+          <div className="red-form-modal-title">{props.title}</div>
+          {props.onClose && (
+            <button onClick={props.onClose} className="red-form-modal-close-button" aria-label="Close">
+              ×
+            </button>
+          )}
+        </div>
+        <div style={{ flex: 1 }} className="red-form-modal-container">
+          {props.children}
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,0 +1,175 @@
+import Form from "red-form"
+import "red-form/dist/index.css"
+function Page() {
+  return (
+    <Form
+      title={"Create Survey"}
+      description="Please fill all the details."
+      schema={{
+        avatar: {
+          label: "avatar",
+          component: "image",
+          value: "",
+          onSelect: async file => {
+            return file.name
+          },
+          span: 2,
+          required: true
+        },
+        tags: {
+          label: "tags",
+          component: "tags",
+          value: ["red", "green", "blue", "yellow", "pink", "violate", "orange"],
+          span: 12
+        },
+        skills: {
+          label: "skills",
+          component: "multi-select",
+          options: [
+            {
+              value: "1",
+              label: "one"
+            },
+            {
+              value: "2",
+              label: "two"
+            },
+            {
+              value: "3",
+              label: "three"
+            },
+            {
+              value: "4",
+              label: "four"
+            },
+            {
+              value: "5",
+              label: "five"
+            }
+          ],
+          value: [],
+          information: "This is a multiple select input",
+          span: 12
+        },
+        name: {
+          label: `name`,
+          component: "text",
+          value: "",
+          autoFill: "name",
+          required: true
+        },
+        group: {
+          label: "group",
+          component: "select",
+          value: "",
+          options: ["PRO", "CRO", "eCRF"]
+        },
+        code: {
+          label: "code",
+          component: "text",
+          value: ""
+        },
+        mesures: {
+          label: "mesures",
+          component: "text",
+          value: ""
+        },
+        type: {
+          label: "type",
+          component: "select",
+          value: "",
+          options: ["general"]
+        },
+        category: {
+          label: "category",
+          component: "select",
+          value: "",
+          options: ["PRO", "CRO", "eCRF"]
+        },
+        area: {
+          label: "theraputic area",
+          component: "select",
+          value: "",
+          options: ["PRO", "CRO", "eCRF"]
+        },
+        source: {
+          label: "source",
+          component: "text",
+          value: ""
+        },
+        branching: {
+          label: "branching",
+          component: "switch",
+          value: false
+        },
+        priority: {
+          label: "priority",
+          component: "range",
+          value: 0,
+          min: 0,
+          max: 100
+        },
+        color: {
+          label: "color",
+          component: "color",
+          value: "#000000"
+        },
+        start: {
+          label: "start date",
+          component: "date",
+          value: "2025-10-16"
+        },
+        "start-time": {
+          label: "start time",
+          component: "time",
+          value: "19:09"
+        },
+        end: {
+          label: "end time",
+          component: "datetime",
+          value: "2025-10-17T19:09"
+        },
+        week: {
+          label: "week",
+          component: "week",
+          value: "2025-W42"
+        },
+        month: {
+          label: "month",
+          component: "month",
+          value: "2025-10"
+        },
+        methods: {
+          label: "methods (Multi Pick)",
+          component: "checkbox",
+          options: ["debit card", "credit card", "upi"],
+          value: []
+        },
+        method: {
+          label: "method (Single Pick)",
+          component: "checkbox",
+          options: ["debit card", "credit card", "upi"],
+          value: ""
+        },
+
+        gender: {
+          label: "gender",
+          component: "radio",
+          options: ["Male", "Female", "Other"],
+          value: ""
+        },
+        comment: {
+          label: "comment",
+          component: "textarea",
+          value: "",
+          span: 12
+        }
+      }}
+      onSubmit={values => {
+        console.log(values)
+      }}
+    />
+  )
+}
+
+export default Page

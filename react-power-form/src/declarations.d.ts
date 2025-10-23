@@ -177,7 +177,7 @@ export type ImageFieldProps = BaseField & {
   onSelect: (file: File) => Promise<string>;
 };
 
-type CustomFieldProps = BaseField & {
+export type CustomFieldProps = BaseField & {
   component: "custom";
   value?: ReactNode;
   inputBase?: boolean;
@@ -188,7 +188,6 @@ export type FieldSchema =
   | TextFieldProps
   | EmailFieldProps
   | SearchFieldProps
-  | SearchFieldProps
   | PasswordFieldProps
   | NumberFieldProps
   | DateFieldProps
@@ -196,7 +195,6 @@ export type FieldSchema =
   | TimeFieldProps
   | WeekFieldProps
   | MonthFieldProps
-  | TimeFieldProps
   | TimeFieldProps
   | TelephoneFieldProps
   | TextAreaFieldProps
