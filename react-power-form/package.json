@@ -1,24 +1,75 @@
 {
   "name": "red-form",
   "version": "1.0.0",
-  "description": "red-form",
-  "main": "index.js",
-  "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch"
+  "description": "A powerful, type-safe React form library that lets you create dynamic dialog-based forms using schema definitions — inspired by Formik but designed for real-time UI rendering and reusability.",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "dependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+  "files": [
+    "dist",
+    "declarations.d.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "keywords": [
+    "react",
+    "form",
+    "formik",
+    "dialog",
+    "typescript",
+    "schema",
+    "form-builder",
+    "dynamic-forms",
+    "form-validation",
+    "react-library",
+    "react-component",
+    "ui",
+    "hooks",
+    "modal-form",
+    "json-form",
+    "custom-fields"
+  ],
+  "author": {
+    "name": "Manish Gun",
+    "email": "mail.cto.manish@gmail.com",
+    "url": "https://manishgun.vercel.app"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manishgun/red-form.git"
+  },
+  "bugs": {
+    "url": "https://github.com/manishgun/red-form/issues"
+  },
+  "homepage": "https://github.com/manishgun/red-form#readme",
+  "funding": {
+    "type": "individual",
+    "url": "https://github.com/sponsors/manishgun"
+  },
+  "type": "module",
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "tsup": "^8.5.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "rimraf": "^6.0.1"
   }
 }

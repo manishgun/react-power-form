@@ -15,7 +15,7 @@
 } */
 
 :root {
-  --red-form-color-primary: #1120ec;
+  --red-form-color-primary: #e28800;
   --red-form-color-secondary: #ff7301;
   --red-form-color-background: #ffffff;
   --red-form-color-text: #000000;
@@ -632,6 +632,8 @@ textarea:-webkit-autofill:active {
   top: 100%; /* 👈 attaches right below the container */
   left: 0;
   width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
   margin-top: 4px; /* small spacing below input */
   background: var(--red-form-color-background);
   border: 1px solid var(--red-form-color-border);
@@ -650,7 +652,9 @@ textarea:-webkit-autofill:active {
 
 .suggestion-item.active,
 .suggestion-item:hover {
-  background: color-mix(in srgb, var(--red-form-color-primary) 60%, white 40%);
+  background: color-mix(in srgb, var(--red-form-color-primary) 70%, white 30%);
+  color: var(--red-form-color-background);
+  font-weight: 600;
 }
 
 .red-form-image-base {

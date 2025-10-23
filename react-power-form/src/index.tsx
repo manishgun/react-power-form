@@ -243,7 +243,7 @@ export function useForm<T extends Schema>(schema: T, onSubmit: (values: Values<T
       const value = values[key];
       const fieldErrors: string[] = [];
 
-      if (field.required && (value === undefined || value === "")) {
+      if (field.required && (value === undefined || value === "" || (Array.isArray(value) && value.length === 0))) {
         fieldErrors.push(`${String(field.label)} is required`);
       }
 
@@ -345,7 +345,7 @@ const Form = <T extends Schema>({
       {title && <div className="red-form-title">{title}</div>}
       {description && <p className="red-form-description">{description}</p>}
       <form className="red-form" onSubmit={form.handleSubmit}>
-        {(Object.entries(schema) as [keyof T, T[keyof T]][]).map(([field, props]) => {
+        {(Object.entries(schema) as [string, T[keyof T]][]).map(([field, props]) => {
           return <InputContainer key={field as string} field={field} props={props} form={form} />;
         })}
         {onSubmit && (
@@ -369,11 +369,24 @@ const Form = <T extends Schema>({
   );
 };
 
-const InputContainer = <T extends Schema, K extends keyof T>({ field, props, form }: { field: K; props: T[K]; form: FormInstance<T> }) => {
+const InputContainer = <T extends Schema, K extends keyof T>({ field, props, form }: { field: string; props: T[K]; form: FormInstance<T> }) => {
   const error = form.errors[field];
+  const style = useMemo(() => {
+    return { gridColumn: props.span ? `span ${props.span}` : undefined, cursor: props.disabled ? "not-allowed" : undefined };
+  }, [props.span, props.disabled]);
+
+  if (props.component === "custom" && !props.inputBase) {
+    return (
+      <div style={style}>
+        <CustomField {...{ field, props, form, error }} />
+      </div>
+    );
+  }
+
   if (props.disabled && !props.information) props.information = "Disabled!";
+
   return (
-    <div className="red-form-input-container" style={{ gridColumn: props.span ? `span ${props.span}` : undefined, cursor: props.disabled ? "not-allowed" : undefined }}>
+    <div className="red-form-input-container" style={style}>
       <div className="red-form-input-label-container">
         <label className="red-form-input-label" htmlFor={field as string} style={{ color: error ? "red" : undefined }}>
           {props.label} {props.required && "*"}
@@ -469,10 +482,16 @@ const InputField = <T extends Schema, K extends keyof T>(properties: InputProps<
       return <MultiSelectField {...properties} />;
     case "tags":
       return <TagsField {...properties} />;
-
+    case "custom":
+      return <CustomField {...properties} />;
     default:
       return <div>Nothing To Render</div>;
   }
+};
+
+const CustomField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {
+  if (props.component !== "custom") return null;
+  return <Fragment>{props.render({ field, props, form, error })}</Fragment>;
 };
 
 const TextField = <T extends Schema, K extends keyof T>({ field, props, form, error }: InputProps<T, K>) => {

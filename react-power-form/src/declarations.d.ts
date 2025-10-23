@@ -16,7 +16,7 @@ export type Adorment = {
 
 export type Option = string | { label: string; value: string };
 
-export type InputProps<T extends Schema, K extends keyof T> = { field: K; props: T[K]; form: FormInstance<T>; error: string[] | undefined };
+export type InputProps<T extends Schema, K extends keyof T> = { field: string; props: T[K]; form: FormInstance<T>; error: string[] | undefined };
 
 export type BaseField = {
   label: string;
@@ -69,7 +69,7 @@ export type PasswordFieldProps = BaseField & {
 
 export type DateFieldProps = BaseField & {
   component: "date";
-  value: `${1 | 2}${number}${number}${number}-${0 | 1}${number}-${0 | 1 | 2 | 3}${number}`;
+  value: `${1 | 2}${number}${number}${number}-${0 | 1}${number}-${0 | 1 | 2 | 3}${number}` | "";
   min?: string;
   max?: string;
   adorment?: Adorment;
@@ -77,7 +77,7 @@ export type DateFieldProps = BaseField & {
 
 export type DateTimeFieldProps = BaseField & {
   component: "datetime";
-  value: `${1 | 2}${number}${number}${number}-${0 | 1}${number}-${0 | 1 | 2 | 3}${number}T${0 | 1 | 2}${number}:${0 | 1 | 2 | 3 | 4 | 5 | 6}${number}`;
+  value: `${1 | 2}${number}${number}${number}-${0 | 1}${number}-${0 | 1 | 2 | 3}${number}T${0 | 1 | 2}${number}:${0 | 1 | 2 | 3 | 4 | 5 | 6}${number}` | "";
   min?: string;
   max?: string;
   adorment?: Adorment;
@@ -85,7 +85,7 @@ export type DateTimeFieldProps = BaseField & {
 
 export type TimeFieldProps = BaseField & {
   component: "time";
-  value: `${0 | 1 | 2}${number}:${0 | 1 | 2 | 3 | 4 | 5 | 6}${number}`;
+  value: `${0 | 1 | 2}${number}:${0 | 1 | 2 | 3 | 4 | 5 | 6}${number}` | "";
   min?: string;
   max?: string;
   adorment?: Adorment;
@@ -93,7 +93,7 @@ export type TimeFieldProps = BaseField & {
 
 export type WeekFieldProps = BaseField & {
   component: "week";
-  value: `${number}${number}${number}${number}-W${number}${number}`;
+  value: `${number}${number}${number}${number}-W${number}${number}` | "";
   min?: number;
   max?: number;
   adorment?: Adorment;
@@ -101,7 +101,7 @@ export type WeekFieldProps = BaseField & {
 
 export type MonthFieldProps = BaseField & {
   component: "month";
-  value: `${1 | 2}${number}${number}${number}-${0 | 1}${number}`;
+  value: `${1 | 2}${number}${number}${number}-${0 | 1}${number}` | "";
   min?: number;
   max?: number;
   adorment?: Adorment;
@@ -177,6 +177,13 @@ export type ImageFieldProps = BaseField & {
   onSelect: (file: File) => Promise<string>;
 };
 
+type CustomFieldProps = BaseField & {
+  component: "custom";
+  value?: ReactNode;
+  inputBase?: boolean;
+  render: <T extends Schema, K extends keyof T>({ field, props, form }: InputProps<T, K>) => ReactNode;
+};
+
 export type FieldSchema =
   | TextFieldProps
   | EmailFieldProps
@@ -201,7 +208,8 @@ export type FieldSchema =
   | SelectFieldProps
   | MultiSelectFieldProps
   | TagsFieldProps
-  | ImageFieldProps;
+  | ImageFieldProps
+  | CustomFieldProps;
 
 export type Schema = Record<string, FieldSchema>;
 

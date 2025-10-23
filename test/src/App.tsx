@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react"
 import Form from "../../react-power-form/src/index"
 
 function App() {
@@ -9,6 +10,13 @@ function App() {
         title={"Create Survey"}
         description="Please fill all the details."
         schema={{
+          show_advance: {
+            label: "show_advance",
+            component: "custom",
+            render: ({}) => <div style={{ background: "red" }}>aaa</div>,
+            inputBase: false,
+            span: 12
+          },
           avatar: {
             label: "avatar",
             component: "image",
@@ -61,7 +69,7 @@ function App() {
             span: 12
           },
           name: {
-            label: "name",
+            label: `name`,
             component: "text",
             value: "",
             autoFill: "name",
