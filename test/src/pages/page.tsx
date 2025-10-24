@@ -11,7 +11,14 @@ function Page() {
           component: "image",
           value: "",
           onSelect: async file => {
-            return file.name
+            return await new Promise((resolve, reject) => {
+              const reader = new FileReader()
+
+              reader.onload = () => resolve(reader.result as string) // this will be the data URL
+              reader.onerror = reject
+
+              reader.readAsDataURL(file)
+            })
           },
           span: 2,
           required: true
@@ -49,25 +56,36 @@ function Page() {
           ],
           value: [],
           information: "This is a multiple select input",
-          span: 12
+          span: 12,
+          required: true
         },
         name: {
           label: `name`,
           component: "text",
           value: "",
           autoFill: "name",
-          required: true
+          required: true,
+          validate: ({ field, props, form }) => {
+            const value = form.values[field] as string
+            const errors: string[] = []
+            if (!value.toLowerCase().startsWith("care-")) {
+              errors.push(`${props.label} must start with "care-"`)
+            }
+            return errors
+          }
         },
         group: {
           label: "group",
           component: "select",
           value: "",
-          options: ["PRO", "CRO", "eCRF"]
+          options: ["PRO", "CRO", "eCRF"],
+          required: true
         },
         code: {
           label: "code",
           component: "text",
-          value: ""
+          value: "",
+          required: true
         },
         mesures: {
           label: "mesures",
@@ -78,7 +96,8 @@ function Page() {
           label: "type",
           component: "select",
           value: "",
-          options: ["general"]
+          options: ["general"],
+          required: true
         },
         category: {
           label: "category",
@@ -90,79 +109,100 @@ function Page() {
           label: "theraputic area",
           component: "select",
           value: "",
-          options: ["PRO", "CRO", "eCRF"]
+          options: ["PRO", "CRO", "eCRF"],
+          required: true
         },
         source: {
           label: "source",
           component: "text",
-          value: ""
+          value: "",
+          required: true
         },
         branching: {
           label: "branching",
           component: "switch",
-          value: false
+          value: false,
+          required: true
         },
         priority: {
           label: "priority",
           component: "range",
           value: 0,
-          min: 0,
-          max: 100
+          min: 20,
+          max: 100,
+          required: true
         },
         color: {
           label: "color",
           component: "color",
-          value: "#000000"
+          value: "#000000",
+          required: true
         },
         start: {
           label: "start date",
           component: "date",
-          value: "2025-10-16"
+          // value: "2025-10-16",
+          value: "",
+          required: true
         },
         "start-time": {
           label: "start time",
           component: "time",
-          value: "19:09"
+          value: "19:09",
+          required: true
         },
         end: {
           label: "end time",
           component: "datetime",
-          value: "2025-10-17T19:09"
+          // value: "2025-10-17T19:09",
+          value: "",
+
+          required: true
         },
         week: {
           label: "week",
           component: "week",
-          value: "2025-W42"
+          // value: "2025-W42",
+          value: "",
+
+          required: true
         },
         month: {
           label: "month",
           component: "month",
-          value: "2025-10"
+          // value: "2025-10",
+          value: "",
+
+          required: true
         },
         methods: {
           label: "methods (Multi Pick)",
           component: "checkbox",
           options: ["debit card", "credit card", "upi"],
-          value: []
+          value: [],
+          required: true
         },
         method: {
           label: "method (Single Pick)",
           component: "checkbox",
           options: ["debit card", "credit card", "upi"],
-          value: ""
+          value: "",
+          required: true
         },
 
         gender: {
           label: "gender",
           component: "radio",
           options: ["Male", "Female", "Other"],
-          value: ""
+          value: "",
+          required: true
         },
         comment: {
           label: "comment",
           component: "textarea",
           value: "",
-          span: 12
+          span: 12,
+          required: true
         }
       }}
       onSubmit={values => {

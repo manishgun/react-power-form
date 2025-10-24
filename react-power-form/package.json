@@ -1,6 +1,6 @@
 {
   "name": "red-form",
-  "version": "1.0.2",
+  "version": "1.0.9",
   "description": "A powerful, type-safe React form library that lets you create dynamic dialog-based forms using schema definitions — inspired by Formik but designed for real-time UI rendering and reusability.",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -23,7 +23,8 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "republish": "npm version patch && npm publish"
   },
   "keywords": [
     "react",

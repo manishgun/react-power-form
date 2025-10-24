@@ -28,6 +28,7 @@ yarn add red-form
 
 ```tsx
 import { Form } from "red-form";
+import "red-form/dist/index.css";
 
 export default function ExampleForm() {
   return (

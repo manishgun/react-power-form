@@ -63,6 +63,7 @@
   width: 100%;
   gap: 20px 24px;
   box-sizing: border-box;
+  position: relative;
 }
 
 .red-form-input-container {
@@ -144,14 +145,16 @@
 .red-form-input-base {
   min-height: 48px;
   background: color-mix(in srgb, var(--red-form-color-background) 90%, white 10%);
-  border: 1px solid #e2e8f0;
+  border: 1px solid color-mix(in srgb, var(--red-form-color-background) 90%, black 10%);
   border-radius: 8px;
   transition: all 0.2s ease;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
   display: flex;
   justify-items: center;
-  box-shadow: 0px 4px 8px color-mix(in srgb, var(--red-form-color-primary), transparent 80%);
   color: var(--red-form-color-text);
+}
+
+.red-form-input-base-shadow {
+  box-shadow: 0px 2px 0px color-mix(in srgb, var(--red-form-color-primary), transparent 80%);
 }
 
 .red-form-input-base:hover {
@@ -173,7 +176,7 @@
   border: 12px solid transparent;
   outline: none;
   background: transparent;
-  color: var(--red-form-color-text);
+  /* color: inherit; */
 }
 
 .red-form-textarea {
@@ -332,6 +335,16 @@ textarea:-webkit-autofill:active {
   color: var(--red-form-color-text);
 }
 
+input[type="date"]::-webkit-datetime-edit,
+input[type="time"]::-webkit-datetime-edit,
+input[type="month"]::-webkit-datetime-edit,
+input[type="week"]::-webkit-datetime-edit,
+input[type="datetime-local"]::-webkit-datetime-edit,
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  color: inherit;
+}
+
 .red-form-color-field-container {
   display: flex;
   align-items: center;
@@ -360,9 +373,10 @@ textarea:-webkit-autofill:active {
 }
 
 .red-form-radio-base-row {
+  margin-block: 12px;
   display: flex;
   flex-direction: row;
-  gap: 20px;
+  gap: 28px;
   height: 100%;
 }
 
@@ -375,13 +389,14 @@ textarea:-webkit-autofill:active {
 .red-form-radio-field-item {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 12px;
 }
 
 .red-form-radio-field-input {
   width: 20px;
   height: 20px;
   accent-color: var(--red-form-color-primary);
+  cursor: pointer;
 }
 
 .red-form-radio-field-label {
@@ -391,8 +406,9 @@ textarea:-webkit-autofill:active {
 .red-form-checkbox-base-row {
   display: flex;
   flex-direction: row;
-  gap: 20px;
+  gap: 28px;
   height: 100%;
+  padding-block: 12px;
 }
 
 .red-form-checkbox-base-column {
@@ -404,7 +420,7 @@ textarea:-webkit-autofill:active {
 .red-form-checkbox-field-item {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 12px;
 }
 
 .red-form-checkbox-field-input {
@@ -419,12 +435,10 @@ textarea:-webkit-autofill:active {
 
 .red-form-select-field {
   width: 100%;
-  font-size: medium;
-  font-family: inherit;
-  color: inherit;
-  background-color: transparent;
-  border: 8px solid transparent;
-  border-radius: 6px;
+  font-size: large;
+  padding-block: 2px;
+  background: transparent;
+  border: 12px solid transparent;
   outline: none;
   cursor: pointer;
   text-transform: capitalize;
@@ -442,8 +456,8 @@ textarea:-webkit-autofill:active {
 
 /* Optional: Add a subtle disabled look */
 .red-form-select-field-disabled {
-  background-color: var(--red-form-color-disabled);
-  cursor: not-allowed;
+  /* background-color: var(--red-form-color-disabled); */
+  /* cursor: not-allowed; */
   pointer-events: none;
 }
 
@@ -454,6 +468,7 @@ textarea:-webkit-autofill:active {
   cursor: pointer;
   height: 100%;
   width: fit-content;
+  padding-block: 12px;
 }
 
 /* Hide checkbox */
@@ -505,15 +520,15 @@ textarea:-webkit-autofill:active {
   box-shadow: 0 3px 8px var(--red-form-color-shadow-dark);
 }
 
-/* .red-form-switch-base input:focus + .red-form-switch {
-  outline: 2px solid #0078ff55;
-  outline-offset: 2px;
-} */
+.red-form-switch-base input:focus + .red-form-switch {
+  outline: 1px solid var(--red-form-color-primary);
+  outline-offset: 1px;
+}
 
 /* Disabled */
 .red-form-switch-base input:disabled + .red-form-switch {
   opacity: 0.7;
-  cursor: not-allowed;
+  /* cursor: not-allowed; */
 }
 
 .red-form-range-field {
@@ -659,16 +674,18 @@ textarea:-webkit-autofill:active {
 }
 
 .red-form-image-base {
-  border: 1px solid transparent;
+  border: none;
   border-radius: 6px;
   width: 100%;
   aspect-ratio: 1;
   overflow: hidden;
   position: relative;
+  color: var(--red-form-color-shadow-dark);
 }
 
 .red-form-image-input {
-  background: var(--red-form-color-surface);
+  background: color-mix(in srgb, var(--red-form-color-background) 90%, black 10%);
+  opacity: 70%;
   width: 100%;
   height: 100%;
   display: flex;
@@ -676,9 +693,9 @@ textarea:-webkit-autofill:active {
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  font-size: 50px;
+  font-size: 120px;
   font-weight: 700;
-  color: var(--red-form-color-shadow-dark);
+  color: var(--red-form-color-text);
 }
 
 .red-form-image-view {
@@ -702,10 +719,34 @@ textarea:-webkit-autofill:active {
 
 .red-form-image-remove-button {
   position: absolute;
-  top: -3px;
+  top: -2px;
   right: 8px;
   font-size: 22px;
   font-weight: 700;
   color: white;
   cursor: pointer;
+}
+
+.red-form-error {
+  color: var(--red-form-color-error);
+}
+
+.red-form-error-shadow {
+  box-shadow: 0px 4px 8px color-mix(in srgb, var(--red-form-color-error), transparent 80%);
+}
+
+.red-form-error-border {
+  border: 1px solid var(--red-form-color-error);
+}
+
+.red-form-error-list {
+  text-transform: capitalize;
+  font-size: 12px;
+}
+
+input[type="range"]::-moz-range-thumb {
+  background: red;
+}
+input[type="range"]::-webkit-slider-thumb {
+  background: red;
 }

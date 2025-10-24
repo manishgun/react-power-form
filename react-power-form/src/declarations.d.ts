@@ -26,6 +26,7 @@ export type BaseField = {
   information?: string;
   disabled?: boolean;
   span?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+  validate?: <T extends Schema, K extends keyof T>({ field, props, form }: { field: string; props: T[K]; form: FormInstance<T> }) => string[];
 };
 
 export type TextFieldProps = BaseField & {
@@ -235,6 +236,7 @@ export type FormProps<T extends Schema> = {
   onChange?: (values: Values<T>) => void;
   onError?: (values: Errors<T>) => void;
   onBlur?: (values: Touched<T>) => void;
+  disabled?: boolean;
   schema: T;
   // DIALOG FIELDS
   open?: boolean;
